@@ -51,6 +51,7 @@ class Droid():
         pass
     
     def avoid_obstacles(self) -> None:
+        # Wait to see for the ultrasonic sensor
         pass
     
     def rbg_bgr_2_hsv(self):
