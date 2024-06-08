@@ -50,7 +50,7 @@ class Droid():
         # Wait to see for the ultrasonic sensor
         pass
     
-    def rbg_bgr_2_hsv(self) -> np.ndarray:
+    def rbg_2_hsv(self) -> np.ndarray:
         # These are RGB Colours from RapidTables
         # "Light_purple" : np.uint8([[[230,230,250]]]),
         
@@ -209,7 +209,7 @@ class Droid():
                 break
             
             # debuggiung
-            self.rbg_bgr_2_hsv()
+            self.rbg_2_hsv()
             combined, blue, yellow = self.colour_detection(frame)
             
             height, width, _ = frame.shape
