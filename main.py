@@ -5,7 +5,7 @@ from droid import Droid
 def main():
     counter = 0
     while counter != 1:
-        droid = Droid(camera_index = 0)
+        droid = Droid(camera_index = 1)
         # keep updating droid status
         droid.detect_track()
         droid.close()

@@ -10,21 +10,17 @@ class Droid():
         self.camera = cv.VideoCapture(camera_index)
         self.droid_status = True
         # self.line : list = ArrowCnn.detect_trail()
-        self.FPS = 10  # Frames per second
+        self.FPS = 50  # Frames per second
         # I reckon have a low FPS for straight line and a higher one for curvy lines and corners
-        # Define the HSV range for Blue
-        # Hard-coded for now
-        self.blue_lower = np.array([100, 150, 50])
-        self.blue_upper = np.array([140, 255, 255])
-        # Define the HSV range for yellow
-        self.yellow_lower = np.array([20, 100, 100])
-        self.yellow_upper = np.array([30, 255, 255])
+        self.blue_lower = None
+        self.blue_upper = None
+        self.yellow_lower = None
+        self.yellow_upper = None
         # Not sure yet.
         self.center_x = 0
         self.center_y = 0
         distance_thresh = 0
     
-        
         # test these thresholds on frames with masks on.
         
     def arrow_detection(self):
@@ -54,29 +50,33 @@ class Droid():
         # Wait to see for the ultrasonic sensor
         pass
     
-    def rbg_bgr_2_hsv(self):
-        
+    def rbg_bgr_2_hsv(self) -> np.ndarray:
         # These are RGB Colours from RapidTables
-        colours = {"dark_blue_purple" : np.uint8([[[75,0,130]]]),
-        "light_blue" : np.uint8([[[240,248,255]]]),
-        "Light_purple" : np.uint8([[[230,230,250]]]),
-        "Light_yellow" : np.uint8([[[255,255,224]]]),
-        "Dark_yellow" : np.uint8([[[51,51,0]]]) }
+        # "Light_purple" : np.uint8([[[230,230,250]]]),
         
-        # Convert to BGR for OpenCV
-        for keys, items in colours.items():
-            items = items[::-1]
-
-        # convert to hsv
-        blue_upper = cv.cvtColor(colours["light_blue"], cv.COLOR_BGR2HSV)
-        blue_lower = cv.cvtColor(colours["dark_blue_purple"], cv.COLOR_BGR2HSV)
+        blue_lower_rbg =np.array([21,40,50], dtype=np.uint8)
+        blue_upper_rbg = np.array([170,0,255], dtype=np.uint8)
         
-        yellow_upper = cv.cvtColor(colours["Light_yellow"], cv.COLOR_BGR2HSV)
-        yellow_lower = cv.cvtColor(colours["Dark_yellow"], cv.COLOR_BGR2HSV)
+        # converting it to an image with the channels
+        blue_lower_rgb_img = np.array([[blue_lower_rbg]], dtype=np.uint8)
+        blue_upper_rgb_img = np.array([[blue_upper_rbg]], dtype=np.uint8)
         
-        purple_upper= cv.cvtColor(colours["Light_purple"], cv.COLOR_BGR2HSV)
-        purple_lower = cv.cvtColor(colours["dark_blue_purple"], cv.COLOR_BGR2HSV)
-    
+        # converting to hsv and extracting the single pixel
+        self.blue_lower = cv.cvtColor(blue_lower_rgb_img, cv.COLOR_RGB2HSV)[0][0]
+        self.blue_upper = cv.cvtColor(blue_upper_rgb_img, cv.COLOR_RGB2HSV)[0][0]
+        
+        yellow_lower_rbg = np.array([100, 87, 61], dtype=np.uint8)
+        yellow_upper_rbg = np.array([255, 255, 0], dtype=np.uint8)
+        yellow_lower_rgb_img = np.array([[yellow_lower_rbg]], dtype=np.uint8)
+        yellow_upper_rgb_img = np.array([[yellow_upper_rbg]], dtype=np.uint8)
+        yellow_lower_hsv = cv.cvtColor(yellow_lower_rgb_img, cv.COLOR_RGB2HSV)[0][0]
+        yellow_upper_hsv = cv.cvtColor(yellow_upper_rgb_img, cv.COLOR_RGB2HSV)[0][0]
+        # adjusting the range for yellow
+        # self.yellow_lower = np.array([light_yellow_hsv_img[0] - 10, 100, 100])
+        # self.yellow_upper = np.array([light_yellow_hsv_img[0] + 10, 255, 255])
+        self.yellow_lower = yellow_lower_hsv
+        self.yellow_upper = yellow_upper_hsv
+        
     def steering(self, derivative: int) -> None:
         """Not now, but i need to adjust the fps if the derivative is too high"""
         """I also need to figure out speed too"""
@@ -152,7 +152,6 @@ class Droid():
             # get centroids and return these coordinates as a tuple
             blue_centroid = self.get_centroid(blue_c)
             yellow_centroid = self.get_centroid(yellow_c)
-            # print(type(yellow_centroid))
 
             # get middle of the line.
             center_x = (blue_centroid[0] + yellow_centroid[0]) // 2
@@ -209,16 +208,22 @@ class Droid():
                 print("CAN'T EXTRACT FRAME! CRITICAL ISSUE!!")
                 break
             
+            # debuggiung
+            self.rbg_bgr_2_hsv()
+            combined, blue, yellow = self.colour_detection(frame)
+            
             height, width, _ = frame.shape
             third_frame = (height//2) + (height//4)
             
-            CURRENT_ROI = frame[:height//4,:]
-            NEXT_ROI = frame[height//4:height//2,:]
-            FUTURE_ROI = frame[height//2:third_frame,:]
-            FUTURE_ROI1 = frame[third_frame:,:]
+            FUTURE_ROI1 = frame[:height//4,:]
+            FUTURE_ROI = frame[height//4:height//2,:]
+            NEXT_ROI = frame[height//2:third_frame,:]
+            CURRENT_ROI = frame[third_frame:,:]
+    
+            
             ROI = [CURRENT_ROI, NEXT_ROI, FUTURE_ROI, FUTURE_ROI1]
             
-            centers, weights = [],[1,2,3,4]
+            centers, weights = [],[4,3,2,1]
             # find what reverse does
             # Get the centers of centroids
             # centers = [self.centroids_center(i) for i in ROI]
@@ -233,17 +238,23 @@ class Droid():
             
     
             if self.center_x is not None and self.center_y is not None:
-                cv.circle(frame, (self.center_x, self.center_y), 5, (0, 255, 0), -1)
-                deviation = self.distance_to_turn(frame.shape[1], cx=self.center_x)
-                self.steering(deviation)
+                for i in range(len(centers)):
+                    cv.circle(CURRENT_ROI, centers[i], 5, (255, 0, 0), -1)
+                cv.circle(CURRENT_ROI, (self.center_x, self.center_y), 5, (255, 0, 0), -1)
+                # deviation = self.distance_to_turn(frame.shape[1], cx=self.center_x)
+                # self.steering(deviation)
                 
                 # ----INVOKE STEERING FUNCTION HERE-----
 
-            cv.imshow('1. CURRENT_ROI', CURRENT_ROI)
-            cv.imshow('2. NEXT_ROI', NEXT_ROI)
-            cv.imshow('3. FUTURE_ROI', FUTURE_ROI)
-            cv.imshow('4. FUTURE_ROI1', FUTURE_ROI1)
-            cv.imshow('5. Frame', frame)
+            cv.imshow('1. FUTURE_ROI1', FUTURE_ROI1)
+            cv.imshow('2. FUTURE_ROI', FUTURE_ROI)
+            cv.imshow('3. NEXT_ROI', NEXT_ROI)
+            cv.imshow('4. CURRENT_ROI', CURRENT_ROI)
+            
+            # cv.imshow("Yellow", yellow)
+            # cv.imshow("blue", blue)
+            cv.imshow("combined", combined)
+            # cv.imshow('5. Frame', frame)
             
     
             
