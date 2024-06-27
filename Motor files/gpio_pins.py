@@ -1,0 +1,19 @@
+import RPi.GPIO as GPIO
+
+# Define GPIO pins
+LEFT_MOTOR_FORWARD = 1
+LEFT_MOTOR_BACKWARD = 2
+RIGHT_MOTOR_FORWARD = 3
+RIGHT_MOTOR_BACKWARD = 4
+
+def setup_gpio():
+    GPIO.setmode(GPIO.BCM)
+    GPIO.setup(LEFT_MOTOR_FORWARD, GPIO.OUT)
+    GPIO.setup(LEFT_MOTOR_BACKWARD, GPIO.OUT)
+    GPIO.setup(RIGHT_MOTOR_FORWARD, GPIO.OUT)
+    GPIO.setup(RIGHT_MOTOR_BACKWARD, GPIO.OUT)
+
+def cleanup_gpio():
+    GPIO.cleanup()
+
+setup_gpio()
