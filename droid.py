@@ -297,7 +297,7 @@ class Droid():
                 cv.circle(CURRENT_ROI, (self.center_x, self.center_y), 5, (255, 0, 0), -1)
                 
                 # testing object detection on purple img
-                img = "purple_img.jpg"
+                img = "Images/purple_img.jpg"
                 img = cv.imread(img)
                 self.detect_purple_obstacle(img) #no param needed in deployment
                 # will need to be run in a thread
