@@ -3,29 +3,24 @@
 import cv2 as cv
 import numpy as np
 import typing
-
+import time
 
 class Droid():
-    def __init__(self, camera_index=0, FPS=50):
+    def __init__(self, camera_index=0, FPS=50, distance_thresh=70, area_threshold=350):
         self.camera = cv.VideoCapture(camera_index)
         self.droid_status = True
         self.obstacle = False
         # self.line : list = ArrowCnn.detect_trail()
         self.FPS = FPS  # Frames per second
         # I reckon have a low FPS for straight line and a higher one for curvy lines and corners
-        self.blue_lower = None
-        self.blue_upper = None
-        self.yellow_lower = None
-        self.yellow_upper = None
-        self.purple_lower = None
-        self.purple_upper = None
+        self.blue_lower, self.blue_upper = None, None
+        self.yellow_lower, self.yellow_upper = None, None
+        self.purple_lower, self.purple_upper = None, None
         self.PURPLE_MASK = None
-        self.center_x = 0
-        self.center_y = 0
-        self.distance_thresh = 70 #lets assume its 70cm for now.
-        self.area_threshold = 350
-        self.cannyt1 = 50
-        self.cannyt2 = 150
+        self.center_x, self.center_y = 0, 0
+        self.distance_thresh = distance_thresh #lets assume its 70cm for now.
+        self.area_threshold = area_threshold
+        self.cannyt1, self.cannyt2 = 50, 150
         # test these thresholds on frames with masks on.
         
     def arrow_detection(self):
@@ -48,7 +43,7 @@ class Droid():
         # purple
         pass
     
-    def test_obstacle_detection(self, text, image):
+    def test_obstacle_detection(self, i, text, image):
         """This function is only created to test the obstacle detection algorithm not to be deployed"""
         print("[Iteration] {i}".format(text))
         cv.imshow("Approximated Contour", image)
@@ -62,8 +57,9 @@ class Droid():
         if contours is None:
             contours = self.find_contours(purple_edges)
         max_c = max(contours, key=cv.contourArea)
-        
-        for i, epsilon in enumerate(np.linspace(0.001, 0.05, 10)):
+        i = 0
+        for epsilon in np.linspace(0.001, 0.05, 10):
+            # Bug HERE -> Fix on saturday
             print("Iteration:", i)
             print("Epsilon value:", epsilon)
             perimeter = cv.arcLength(max_c, closed=True)
@@ -74,10 +70,11 @@ class Droid():
             cv.drawContours(o_image, [max_c], -1, colour, 3)
             result = "eps={:.4f}, points={}".format(epsilon, len(approx))
             cv.putText(o_image, result, (x_axis_tl, y_axis_tl-30), cv.FONT_HERSHEY_COMPLEX, 0.7, colour, 3)
+            i += 1
             
             if len(approx) == 4 and self.area_threshold < max_c:
                 self.obstacle = True  
-                self.test_obstacle_detection(result, o_image)
+                self.test_obstacle_detection(i, result, o_image)
                 return True
             
             elif len(approx) == 4:
@@ -299,7 +296,9 @@ class Droid():
                     cv.circle(CURRENT_ROI, centers[i], 5, (255, 0, 0), -1)
                 cv.circle(CURRENT_ROI, (self.center_x, self.center_y), 5, (255, 0, 0), -1)
                 
-                img = "DRC/purple_img.jpg"
+                # testing object detection on purple img
+                img = "purple_img.jpg"
+                img = cv.imread(img)
                 self.detect_purple_obstacle(img) #no param needed in deployment
                 # will need to be run in a thread
                 
