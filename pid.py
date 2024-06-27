@@ -11,14 +11,12 @@ class PIDController:
         # Proportional term
         proportional = self.kp * error
         
-        # Integral term
+        # Integrand
         self.integral += error
         integral = self.ki * self.integral
         
-        # Derivative term
+        # rate of change
         derivative = self.kd * (error - self.previous_error)
         self.previous_error = error
+        return proportional + integral + derivative
         
-        # Compute the output
-        output = proportional + integral + derivative
-        return output
