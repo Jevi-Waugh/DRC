@@ -56,7 +56,8 @@ class Droid():
         purple_edges = self.canny_edge(mask)
         if contours is None:
             contours = self.find_contours(purple_edges)
-        max_c = max(contours, key=cv.contourArea)
+            if contours:
+                max_c = max(contours, key=cv.contourArea)
         i = 0
         for epsilon in np.linspace(0.001, 0.05, 10):
             # Bug HERE -> Fix on saturday
@@ -298,8 +299,8 @@ class Droid():
                 
                 # testing object detection on purple img
                 img = "Images/purple_img.jpg"
-                img = cv.imread(img)
-                self.detect_purple_obstacle(img) #no param needed in deployment
+                # img = cv.imread(img)
+                self.detect_purple_obstacle() #no param needed in deployment
                 # will need to be run in a thread
                 
                 
