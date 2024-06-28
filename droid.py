@@ -6,22 +6,23 @@ import typing
 import time
 
 class Droid():
-    def __init__(self, camera_index=0, FPS=50, distance_thresh=70, area_threshold=350):
+    def __init__(self, camera_index=0, FPS=20, distance_thresh=70, area_threshold=350, frame=None):
+        self.FPS = FPS  # Frames per second
+        self.frame = frame
+        # low FPS for straight line and a higher one for curvy lines and corners
         self.camera = cv.VideoCapture(camera_index)
         self.droid_status = True
         self.obstacle = False
-        # self.line : list = ArrowCnn.detect_trail()
-        self.FPS = FPS  # Frames per second
-        # I reckon have a low FPS for straight line and a higher one for curvy lines and corners
+        self.deviation = 0
+        self.center_x, self.center_y = 0, 0
+        self.cannyt1, self.cannyt2 = 50, 150
+        self.distance_thresh = distance_thresh #lets assume its 70cm for now.
+        self.area_threshold = area_threshold
         self.blue_lower, self.blue_upper = None, None
         self.yellow_lower, self.yellow_upper = None, None
         self.purple_lower, self.purple_upper = None, None
         self.PURPLE_MASK = None
-        self.center_x, self.center_y = 0, 0
-        self.distance_thresh = distance_thresh #lets assume its 70cm for now.
-        self.area_threshold = area_threshold
-        self.cannyt1, self.cannyt2 = 50, 150
-        # test these thresholds on frames with masks on.
+        # self.line : list = ArrowCnn.detect_trail()
         
     def arrow_detection(self):
         """detect arrow"""
@@ -48,51 +49,6 @@ class Droid():
         print("[Iteration] {i}".format(text))
         cv.imshow("Approximated Contour", image)
         cv.waitKey(0)
-    
-    def detect_purple_obstacle(self, mask=None, contours=None) -> bool:
-        colour = (0, 100, 255)
-        if mask is None:
-            mask = self.PURPLE_MASK
-        purple_edges = self.canny_edge(mask)
-        if contours is None:
-            contours = self.find_contours(purple_edges)
-            if contours:
-                max_c = max(contours, key=cv.contourArea)
-        i = 0
-        for epsilon in np.linspace(0.001, 0.05, 10):
-            # Bug HERE -> Fix on saturday
-            print("Iteration:", i)
-            print("Epsilon value:", epsilon)
-            perimeter = cv.arcLength(max_c, closed=True)
-            approx = cv.approxPolyDP(max_c, epsilon * perimeter, closed=True)
-            o_image = mask.copy()
-            # approximate box
-            (x_axis_tl, y_axis_tl, width, height) = cv.boundingRect(max_c)
-            cv.drawContours(o_image, [max_c], -1, colour, 3)
-            result = "eps={:.4f}, points={}".format(epsilon, len(approx))
-            cv.putText(o_image, result, (x_axis_tl, y_axis_tl-30), cv.FONT_HERSHEY_COMPLEX, 0.7, colour, 3)
-            i += 1
-            
-            if len(approx) == 4 and self.area_threshold < max_c:
-                self.obstacle = True  
-                self.test_obstacle_detection(i, result, o_image)
-                return True
-            
-            elif len(approx) == 4:
-                # Recursive function as a safety contingency.
-                # Convex hull ->The smallest convex polygon that can contain all the points of the original contour.
-                # will make it easier to find the box if there's a visual struggle
-                peri = cv.arcLength(contours, closed=True)
-                epsilon = 0.01 * peri
-                approximation_func =cv.approxPolyDP(max_c, epsilon, closed=True)
-                contours = cv.convexHull(approximation_func)
-                self.detect_purple_obstacle(contours=contours)
-            else: return False
-            
-        
-    def avoid_obstacles(self) -> None:
-        # Wait to see for the ultrasonic sensor
-        pass
     
     def rbg_2_hsv(self) -> np.ndarray:# Work on yellow tape and test purple obstacle
         
@@ -129,25 +85,58 @@ class Droid():
         # experimenting adjustment for the range of yellow
         # self.yellow_lower = np.array([light_yellow_hsv_img[0] - 10, 100, 100])
         # self.yellow_upper = np.array([light_yellow_hsv_img[0] + 10, 255, 255])
-        
+    
+    def distance_to_turn(self, frame_width: int, cx: int, arrow=None) -> int:
+        """This function calculates the difference between the track and the center of the camera."""
+        """Thus returns the difference for how much distance there is to turn for the steering function"""
+        # check if frame_width and center is not the same
+        #  ??
+        # I might have to use multithreading here unfortunately 
+        # OMG mutexes and stuff
+        # Only because i have to check for arrows as well.
+        # but not here instead where this function is invoked
+        frame_center = frame_width // 2
+        derivative = frame_center - cx
+        return derivative
+    
+    def recalibration_function(self, yellow: bool, blue: bool):
+        """the strict identification and perception of both Blue and Yellow tape"""
+        """Assume only one tape was detected"""
+        pass
+    
+    def perspective_transformation(self):
+        """This should map the original coordinates to new ones so that it mimics human perception for better input of data"""
+        pass
+    
     def steering(self, derivative: int) -> None:
         """Not now, but i need to adjust the fps if the derivative is too high"""
         """I also need to figure out speed too"""
-        if derivative == 0:
-            # Move forward
+        """This basically makes the droid go around a curvy track but need to create another function to account for both tapes"""
+        actual_front_distance = 0
+        if derivative < 0 :
+            # steer right
+            # Run c code and provide relevant parameters
+            print(f"Steering right")
+            pass
+        elif derivative > 0 :
+            # steer left
+            print(f"Steering left")
             pass
         else:
-            if derivative < 0 :
-                # steer right
-                # Run c code and provide relevant parameters
-                print(f"Steering right")
-                pass
-            if derivative > 0 :
-                # steer left
-                print(f"Steering left")
-                pass
+            if self.obstacle:
+                if self.distance_thresh > actual_front_distance:
+                    # figure out a mathematical expression to determine how far is the object in the front.
+                    # make it go past through teh obstacle.
+                    # Moving foward
+                    print(f"Moving foward")
+            
+    def open_camera(self):
+        # Create a VideoCapture object to capture frames from the webcam
+        if not self.camera.isOpened():
+            print("uanble to open camera")
+            # return False 
     
-    def close(self) -> None:
+    def close_camera(self) -> None:
         # Release the video capture object and close all windows
         self.camera.release()
         cv.destroyAllWindows()
@@ -229,19 +218,6 @@ class Droid():
         
         # Calculate the center of the track and return a tuple of (x,y)
         return self.calculate_center_line(blue_contours, yellow_contours)
-    
-    def distance_to_turn(self, frame_width: int, cx: int, arrow=None) -> int:
-        """This function calculates the difference between the track and the center of the camera."""
-        """Thus returns the difference for how much distance there is to turn for the steering function"""
-        # check if frame_width and center is not the same
-        #  ??
-        # I might have to use multithreading here unfortunately 
-        # OMG mutexes and stuff
-        # Only because i have to check for arrows as well.
-        # but not here instead where this function is invoked
-        frame_center = frame_width // 2
-        derivative = frame_center - cx
-        return derivative
 
     def calculate_wac(self, centers : list[tuple, tuple, tuple, tuple], weights : list) -> tuple[int, int]:
         # calculate weighted average center
@@ -253,21 +229,15 @@ class Droid():
             return (avg_x, avg_y)
         return None, None
     
-    def detect_track(self) -> None:
-        # Create a VideoCapture object to capture frames from the webcam
-        if not self.camera.isOpened():
-            print("Cannot open camera")
-            # return False
-
+    def detect_track(self) -> tuple[int, int]:
         while True:
-            ret, frame = self.camera.read()
+            self.open_camera()
+            ret, self.frame = self.camera.read()
+            frame = self.frame
             if not ret:
                 print("CAN'T EXTRACT FRAME! CRITICAL ISSUE!!")
                 break
             
-            # debuggiung
-            self.rbg_2_hsv()
-            # masks
             combined, blue, yellow = self.colour_detection(frame)
             
             height, width, _ = frame.shape
@@ -279,7 +249,8 @@ class Droid():
             CURRENT_ROI = frame[third_frame:,:]
             ROI = [CURRENT_ROI, NEXT_ROI, FUTURE_ROI, FUTURE_ROI1]
             
-            centers, weights = [],[4,3,2,1]
+            centers: list[tuple[int, int]] = [] # A list of centers for trial and optimization
+            weights = [4,3,2,1]
             # find what reverse does
             # Get the centers of centroids
             # centers = [self.centroids_center(i) for i in ROI]
@@ -288,26 +259,13 @@ class Droid():
                 if center_x != None and center_y != None:
                     centers.append((center_x, center_y))
             # print(centers)
-                # perhaps consider a dictionary
-            # OMG Big bug avoided here
             self.center_x, self.center_y = self.calculate_wac(centers, weights[:len(centers)])
             
             if self.center_x is not None and self.center_y is not None:
                 for i in range(len(centers)):
                     cv.circle(CURRENT_ROI, centers[i], 5, (255, 0, 0), -1)
                 cv.circle(CURRENT_ROI, (self.center_x, self.center_y), 5, (255, 0, 0), -1)
-                
-                # testing object detection on purple img
-                img = "Images/purple_img.jpg"
-                # img = cv.imread(img)
-                self.detect_purple_obstacle() #no param needed in deployment
-                # will need to be run in a thread
-                
-                
-                # deviation = self.distance_to_turn(frame.shape[1], cx=self.center_x)
-                # self.steering(deviation)
-                
-                # ----INVOKE STEERING FUNCTION HERE-----
+            deviation = self.distance_to_turn(self.frame.shape[1], cx=self.center_x)
 
             cv.imshow('1. FUTURE_ROI1', FUTURE_ROI1)
             cv.imshow('2. FUTURE_ROI', FUTURE_ROI)
@@ -318,4 +276,6 @@ class Droid():
             # Check for the 'q' key press to exit the loop
             if cv.waitKey(1000 // self.FPS) == ord('q'):  # Adjust delay based on desired FPS
                 break 
+            
+            return self.center_x, self.center_y
     
