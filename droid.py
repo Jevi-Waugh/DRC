@@ -121,6 +121,7 @@ class Droid():
         elif derivative > 0 :
             # steer left
             print(f"Steering left")
+            # 
             pass
         else:
             if self.obstacle:
