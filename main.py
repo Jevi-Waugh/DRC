@@ -17,7 +17,7 @@ def main():
         # thread1 = cx, cy = droid.detect_track()
         
         # 2. invoke thread 
-        # thread2 = droid.steering(deviation)
+        # thread2 = droid.directional_capabilities(deviation)
         
         # 3. invoke thread 
         # thread3 = detect_purple_obstacle(droid)
