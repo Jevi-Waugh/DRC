@@ -1,0 +1,16 @@
+
+Priority 1
+[  ] Arrow detection and turn degree
+[started] Improvements what if only the left/right part of the tape appears -> 
+        HAVE A TURN DEGREE THRESHOLD    
+
+Priority 2
+[DONE/test] Obstacle detection
+[  ] Multi-threading for camera and OD
+[  ] Ultrasonic sensor readings from C
+[started] Obstacle diversion function
+[  ] start and end line is the green tape
+
+Priority 3
+[  ] Autonomous robot loop
+[  ] Speed adjustment function

@@ -1,5 +1,0 @@
-# what if  lines don't appear due to strong curve
-# what if only the left/right part of the tape appears -> 
-    #  calculate the stromngest contour of the tape and still
-    # try and find the middle point
-    # wont be perfect but fine tune later using a PID Controller
