@@ -1,0 +1,16 @@
+
+Priority 1
+[  ] Arrow detection and turn degree
+[started] Improvements what if only the left/right part of the tape appears -> 
+[Done/test] Steering, obstacle diversion and main driving capabilities
+
+Priority 2
+[DONE/test] Obstacle detection
+[started] Multi-threading for camera and OD
+[  ] Ultrasonic sensor readings from C
+
+
+Priority 3
+[started] Autonomous robot loop
+[  ] Speed adjustment function
+[  ] start and end line is the green tape
