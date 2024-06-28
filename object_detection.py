@@ -12,7 +12,7 @@ def detect_purple_obstacle(droid: Droid, mask=None, contours=None) -> bool:
         contours = droid.find_contours(purple_edges)
         if contours:
             max_c = max(contours, key=cv.contourArea)
-            droid.purple_centroid = droid.get_centroid(max_c)
+            # droid.purple_centroid = droid.get_centroid(max_c)
     i : int = 0
     for epsilon in np.linspace(0.001, 0.05, 10):
         # Bug HERE -> Fix on saturday
@@ -24,6 +24,7 @@ def detect_purple_obstacle(droid: Droid, mask=None, contours=None) -> bool:
         # approximate box
         (x_axis_tl, y_axis_tl, width, height) = cv.boundingRect(max_c)
         droid.obstacle_area = width, height
+        droid.purple_centroid = width//2, height//2
         cv.drawContours(o_image, [max_c], -1, colour, 3)
         result = "eps={:.4f}, points={}".format(epsilon, len(approx))
         cv.putText(o_image, result, (x_axis_tl, y_axis_tl-30), cv.FONT_HERSHEY_COMPLEX, 0.7, colour, 3)

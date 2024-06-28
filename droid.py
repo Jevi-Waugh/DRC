@@ -6,25 +6,32 @@ import typing
 import time
 
 class Droid():
-    def __init__(self, camera_index=0, FPS=20, distance_thresh=70, area_threshold=350, frame=None):
+    def __init__(self, camera_index=0, FPS=20, ROH=40, ROW=40, frame=None):
         self.FPS = FPS  # Frames per second
         self.frame = frame
         # low FPS for straight line and a higher one for curvy lines and corners
         self.camera = cv.VideoCapture(camera_index)
-        self.droid_status = True
-        self.obstacle = False
+        self.droid_status:bool = True
+        self.obstacle:bool = False
         self.deviation = 0
         self.center_x, self.center_y = 0, 0
         self.cannyt1, self.cannyt2 = 50, 150
-        self.distance_thresh = distance_thresh #lets assume its 70cm for now.
-        self.area_threshold = area_threshold
+        self.purple_centroid: tuple[int, int] = None # this is actually the center point of the obstacle.[bounding box though]
+        
+        self.REAL_OBSTACLE_HEIGHT = ROH
+        self.REAL_OBSTACLE_WIDTH = ROW
+        self.focal_length = 700 # double check this
+        # adjust thresh by 50% or howvever long the droid is for it to have enough space to curve around safely
+        self.obstacle_area_thresh = (ROH * ROW)*0.5 
+        self.obstacle_area: tuple[int, int] = 0,0 #just in case i need dimensions
+
         self.blue_lower, self.blue_upper = None, None
         self.yellow_lower, self.yellow_upper = None, None
         self.purple_lower, self.purple_upper = None, None
         self.PURPLE_MASK = None
         # self.line : list = ArrowCnn.detect_trail()
         
-    def arrow_detection(self):
+    def arrow_detection(self):  # Not implemented -> Urgent
         """detect arrow"""
         # get frame and send to pytorch
         
@@ -35,22 +42,58 @@ class Droid():
         # for e.g we don't want to count just lines
         pass
     
-    def turn_degree(self):
+    def turn_degree(self):  # Not implemented -> Urgent
         """Find the degree of turning"""
         pass
     
-    def obstacle_distance(self) -> int:
+    def ultrasonic_waves(self) -> int:  # Not implemented -> Urgent
         # get distance from c code
         # purple
         pass
     
-    def test_obstacle_detection(self, i, text, image):
+    def recalibration_function(self, yellow: bool, blue: bool):  # Not implemented -> Urgent
+        """the strict identification and perception of both Blue and Yellow tape"""
+        """Assume only one tape was detected"""
+        """need a strong value for colour detection this time"""
+        pass
+    
+    def perspective_transformation(self): # Not implemented -> Urgent
+        """This should map the original coordinates to new ones so that it mimics human perception for better input of data"""
+        pass
+    
+    def map_boundboxdim2_framedim(self): # Not implemented -> Urgent
+        # update new value for purple centroid
+        pass
+    
+    # ^^^^^^^
+    # |||||||
+    
+    def move_foward(self, seconds=None): # Not implemented -> Last minute
+        pass
+    
+    def turn_right(self, degree): # Not implemented -> Last minute
+        pass
+    
+    def turn_left(self, degree): # Not implemented -> Last minute
+        pass
+    
+    def reverse(self): # Not implemented -> Last minute
+        pass
+    
+    def halt(self): # Not implemented -> Last minute
+        pass
+        
+    def test_obstacle_detection(self, i, text, image): #Testing function
         """This function is only created to test the obstacle detection algorithm not to be deployed"""
         print("[Iteration] {i}".format(text))
         cv.imshow("Approximated Contour", image)
         cv.waitKey(0)
     
-    def rbg_2_hsv(self) -> np.ndarray:# Work on yellow tape and test purple obstacle
+    def estimate_object_distance(self) -> int: # Done
+        """A mathematical expression to determine how far is the object in the front -> distance of obstacle"""
+        return int((self.REAL_OBSTACLE_HEIGHT * self.focal_length) / self.obstacle_area[1])
+    
+    def rbg_2_hsv(self) -> np.ndarray:# Work on yellow tape and test purple obstacle and green lines
         
         # [125, 50, 50]) is what i should get for the purple lower one
         # These are RGB Colours from RapidTables
@@ -86,50 +129,66 @@ class Droid():
         # self.yellow_lower = np.array([light_yellow_hsv_img[0] - 10, 100, 100])
         # self.yellow_upper = np.array([light_yellow_hsv_img[0] + 10, 255, 255])
     
+    def directional_capabilities(self, derivative: int, degree=60) -> None: # Almost Done
+        """Not now, but i need to adjust the fps if the derivative is too high"""
+        """I also need to figure out speed too"""
+        """This basically makes the droid go around a curvy track"""
+        
+        distance = self.estimate_object_distance()
+        # use this distance to fine tune the avoid_obstacle function
+        avoid = True if self.obstacle and self.obstacle_area[0] * self.obstacle_area[1] > self.obstacle_area_thresh else False
+        if avoid:
+                self.avoid_obstacle()
+        if derivative < 0:
+            # we'll fine tune the degree here when we test it depending on how big the derivative is
+            self.turn_right(degree)
+            
+        elif derivative > 0 :
+            self.turn_left(degree)
+        else:
+            self.move_foward()
+            
+    def avoid_obstacle(self): # Almost Done
+        # get readings from ultrasonic sensor.
+        # seconds is from the data of the sensor
+        self.recalibration_function()
+        #only issue with this is that the centroid could be on the far siude of the other edge miscalculating the distance
+        
+        # IMPLEMENT BELOW
+        
+        # self.purple_centroid[0]
+        degree = self.map_boundboxdim2_framedim() 
+        
+        seconds = 0 # imaging getting this from the sensor thread.
+        if (self.purple_centroid[0] - self.center_x) > 0:
+            # and there is sufficient distance between the obstacle and the left tape
+            # then go around the LEFT side of the object
+            # degree is based off the distance
+            self.halt()
+            self.turn_left(degree)
+            self.move_foward(seconds)
+            self.turn_right(degree)
+            self.move_foward(seconds)
+        elif (self.purple_centroid[0] - self.center_x) < 0:
+            # then go around the RIGHT side of the object
+            self.halt()
+            self.turn_right(degree)
+            self.move_foward(seconds)
+            self.turn_left(degree)
+            self.move_foward(seconds)
+    
     def distance_to_turn(self, frame_width: int, cx: int, arrow=None) -> int:
         """This function calculates the difference between the track and the center of the camera."""
         """Thus returns the difference for how much distance there is to turn for the steering function"""
         frame_center = frame_width // 2
         derivative = frame_center - cx
         return derivative
-    
-    def recalibration_function(self, yellow: bool, blue: bool):
-        """the strict identification and perception of both Blue and Yellow tape"""
-        """Assume only one tape was detected"""
-        pass
-    
-    def perspective_transformation(self):
-        """This should map the original coordinates to new ones so that it mimics human perception for better input of data"""
-        pass
-    
-    def steering(self, derivative: int) -> None:
-        """Not now, but i need to adjust the fps if the derivative is too high"""
-        """I also need to figure out speed too"""
-        """This basically makes the droid go around a curvy track but need to create another function to account for both tapes"""
-        actual_front_distance = 0
-        if derivative < 0 :
-            # steer right
-            # Run c code and provide relevant parameters
-            print(f"Steering right")
-            pass
-        elif derivative > 0 :
-            # steer left
-            print(f"Steering left")
-            # 
-            pass
-        else:
-            if self.obstacle:
-                if self.distance_thresh > actual_front_distance:
-                    # figure out a mathematical expression to determine how far is the object in the front.
-                    # make it go past through teh obstacle.
-                    # Moving foward
-                    print(f"Moving foward")
             
-    def open_camera(self):
+    def open_camera(self) -> bool:
         # Create a VideoCapture object to capture frames from the webcam
         if not self.camera.isOpened():
             print("uanble to open camera")
-            # return False 
+            return False 
     
     def close_camera(self) -> None:
         # Release the video capture object and close all windows
