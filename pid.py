@@ -1,5 +1,6 @@
 
 class PIDController:
+    # Proportional–integral–derivative controller
     def __init__(self, kp, ki, kd):
         self.kp = kp
         self.ki = ki
