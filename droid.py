@@ -89,12 +89,6 @@ class Droid():
     def distance_to_turn(self, frame_width: int, cx: int, arrow=None) -> int:
         """This function calculates the difference between the track and the center of the camera."""
         """Thus returns the difference for how much distance there is to turn for the steering function"""
-        # check if frame_width and center is not the same
-        #  ??
-        # I might have to use multithreading here unfortunately 
-        # OMG mutexes and stuff
-        # Only because i have to check for arrows as well.
-        # but not here instead where this function is invoked
         frame_center = frame_width // 2
         derivative = frame_center - cx
         return derivative
