@@ -10,6 +10,7 @@ from VisionAPI import VisionAPI
 
 
 def main():
+    # PIPELINE
     counter = 0
     while counter != 1:
         # Vision to Motor
