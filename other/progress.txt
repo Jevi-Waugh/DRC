@@ -6,9 +6,9 @@ Priority 1
 
 Priority 2
 [DONE/test] Obstacle detection
-[Almost done] Multi-threading for camera and OD
+[Almost done] Multi-threading / process for camera and OD
 [  ] Ultrasonic sensor readings from C
-[Started] Vision and Motor API
+[DONE] Vision and Motor API
 
 
 Priority 3
