@@ -19,13 +19,13 @@ class motor:
     def halt(self): # Not implemented -> Last minute
         pass
     
-    def directional_capabilities(self, derivative: int, degree=60) -> None: # Almost Done
+    def directional_capabilities(self, droid: Droid, derivative: int, degree=60) -> None: # Almost Done
         """Not now, but i need to adjust the fps if the derivative is too high"""
         """This basically makes the droid go around a curvy track"""
         
-        distance = self.estimate_object_distance()
+        distance = droid.estimate_object_distance()
         # use this distance to fine tune the avoid_obstacle function
-        avoid = True if self.obstacle and self.obstacle_area[0] * self.obstacle_area[1] > self.obstacle_area_thresh else False
+        avoid = True if droid.obstacle and droid.obstacle_area[0] * droid.obstacle_area[1] > droid.obstacle_area_thresh else False
         if avoid:
                 self.avoid_obstacle()
         if derivative < 0:
@@ -37,20 +37,20 @@ class motor:
         else:
             self.move_foward()
             
-    def avoid_obstacle(self): # Almost Done
+    def avoid_obstacle(self, droid: Droid): # Almost Done
         # get readings from ultrasonic sensor.
         # seconds is from the data of the sensor
-        self.recalibration_function()
+        droid.recalibration_function()
         #only issue with this is that the centroid could be on the far siude of the other edge miscalculating the distance
         
         # IMPLEMENT BELOW
         
         
-        # self.purple_centroid[0]
-        degree = self.map_boundboxdim2_framedim() 
+        # droid.purple_centroid[0]
+        degree = droid.map_boundboxdim2_framedim() 
         
         seconds = 0 # imaging getting this from the sensor thread.
-        if (self.purple_centroid[0] - self.center_x) > 0:
+        if (droid.purple_centroid[0] - droid.center_x) > 0:
             # and there is sufficient distance between the obstacle and the left tape
             # then go around the LEFT side of the object
             # degree is based off the distance
@@ -59,7 +59,7 @@ class motor:
             self.move_foward(seconds)
             self.turn_right(degree)
             self.move_foward(seconds)
-        elif (self.purple_centroid[0] - self.center_x) < 0:
+        elif (droid.purple_centroid[0] - droid.center_x) < 0:
             # then go around the RIGHT side of the object
             self.halt()
             self.turn_right(degree)
