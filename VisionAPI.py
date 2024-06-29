@@ -3,8 +3,7 @@ from ipcqueue import posixmq
 from droid import Droid
 from object_detection import detect_purple_obstacle
 
-
-def VisionAPI_Sender():
+def VisionAPI(send_q, recieve_q):
     """This will have the vision Process and will send input and recive output
     Not sure if this will be the final structure for the spatial analysis and activity
     but Multithreading is strongly on the table"""
@@ -20,8 +19,10 @@ def VisionAPI_Sender():
     
     # setting up queue
     # maybe typecast multiple data into a string for easy send off messages
-    queue = posixmq.Queue('/test_queue', maxmsgsize=1024)
+
     messages = []
+    
+    # send message.
 
 def close_unlink_queue(queue):
     queue.close()
