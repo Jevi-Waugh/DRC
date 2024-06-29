@@ -1,0 +1,13 @@
+# Processes
+    # Motor
+        # Steering and driving capabilities
+        # Obstacle diversion
+        # Arrow action
+    
+    # Vision
+        # Centroids calculation
+        # obstacle detection
+        # Arrow detection
+        
+    # Control
+        # Not sure - Type here Jack

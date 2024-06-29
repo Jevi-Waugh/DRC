@@ -6,11 +6,14 @@ Priority 1
 
 Priority 2
 [DONE/test] Obstacle detection
-[started] Multi-threading for camera and OD
+[Almost done] Multi-threading for camera and OD
 [  ] Ultrasonic sensor readings from C
+[Started] Vision and Motor API
 
 
 Priority 3
 [started] Autonomous robot loop
 [  ] Speed adjustment function
 [  ] start and end line is the green tape
+
+
