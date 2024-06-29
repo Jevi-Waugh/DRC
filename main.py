@@ -50,7 +50,7 @@ def main():
         
         
         
-        droid.close_camera()
+        # droid.close_camera()
         counter += 1
         
 if __name__ == "__main__":
