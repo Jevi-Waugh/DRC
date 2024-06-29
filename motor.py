@@ -19,24 +19,6 @@ class motor:
     def halt(self): # Not implemented -> Last minute
         pass
     
-    def directional_capabilities(self, droid: Droid, derivative: int, degree=60) -> None: # Almost Done
-        """Not now, but i need to adjust the fps if the derivative is too high"""
-        """This basically makes the droid go around a curvy track"""
-        
-        distance = droid.estimate_object_distance()
-        # use this distance to fine tune the avoid_obstacle function
-        avoid = True if droid.obstacle and droid.obstacle_area[0] * droid.obstacle_area[1] > droid.obstacle_area_thresh else False
-        if avoid:
-                self.avoid_obstacle()
-        if derivative < 0:
-            # we'll fine tune the degree here when we test it depending on how big the derivative is
-            self.turn_right(degree)
-            
-        elif derivative > 0 :
-            self.turn_left(degree)
-        else:
-            self.move_foward()
-            
     def avoid_obstacle(self, droid: Droid): # Almost Done
         # get readings from ultrasonic sensor.
         # seconds is from the data of the sensor
@@ -44,7 +26,7 @@ class motor:
         #only issue with this is that the centroid could be on the far siude of the other edge miscalculating the distance
         
         # IMPLEMENT BELOW
-        
+        # possibly distance between object and tape
         
         # droid.purple_centroid[0]
         degree = droid.map_boundboxdim2_framedim() 
@@ -67,6 +49,25 @@ class motor:
             self.turn_left(degree)
             self.move_foward(seconds)
     
+    def directional_capabilities(self, droid: Droid, derivative: int, degree=60) -> None: # Almost Done
+        """Not now, but i need to adjust the fps if the derivative is too high"""
+        """This basically makes the droid go around a curvy track"""
+        
+        distance = droid.estimate_object_distance()
+        # use this distance to fine tune the avoid_obstacle function
+        avoid = True if droid.obstacle and droid.obstacle_area[0] * droid.obstacle_area[1] > droid.obstacle_area_thresh else False
+        if avoid:
+                self.avoid_obstacle()
+        if derivative < 0:
+            # we'll fine tune the degree here when we test it depending on how big the derivative is
+            self.turn_right(degree)
+            
+        elif derivative > 0 :
+            self.turn_left(degree)
+        else:
+            self.move_foward()
+            
+
     def distance_to_turn(self, frame_width, cx, arrow=None) -> int:
         """This function calculates the difference between the track and the center of the camera.
         Thus returns the difference for how much distance there is to turn for the steering function"""
