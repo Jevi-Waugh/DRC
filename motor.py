@@ -1,7 +1,8 @@
 from droid import Droid
 
-class motor:
-    def __init__(self, speed=0):
+class motor(Droid):
+    def __init__(self, speed, camera_index=0, FPS=20, ROH=40, ROW=40, frame=None):
+        super.__init__(self, camera_index, FPS, ROH, ROW, frame)
         self.speed = speed
         
     def move_foward(self, seconds=None): # Not implemented -> Last minute
@@ -67,11 +68,8 @@ class motor:
         else:
             self.move_foward()
             
-
-    def distance_to_turn(self, frame_width, cx, arrow=None) -> int:
-        """This function calculates the difference between the track and the center of the camera.
-        Thus returns the difference for how much distance there is to turn for the steering function"""
-        frame_center = frame_width // 2
-        derivative = frame_center - cx
-        return derivative
-    
+            
+            
+            
+            
+            
