@@ -32,7 +32,8 @@ class Droid():
         # self.line : list = ArrowCnn.detect_trail()
         
     def arrow_detection(self):  # Not implemented -> Urgent
-        """detect arrow"""
+        """detect arrow -> either use contour detection or harris corner detection and get 7 corners"""
+        
         # get frame and send to pytorch
         
         # get current image/ from pytorch model
@@ -40,6 +41,7 @@ class Droid():
         
         # determine a threshold to determine which arrow image is good to start counting distance
         # for e.g we don't want to count just lines
+        
         pass
     
     def turn_degree(self):  # Not implemented -> Urgent
@@ -68,20 +70,7 @@ class Droid():
     # ^^^^^^^
     # |||||||
     
-    def move_foward(self, seconds=None): # Not implemented -> Last minute
-        pass
     
-    def turn_right(self, degree): # Not implemented -> Last minute
-        pass
-    
-    def turn_left(self, degree): # Not implemented -> Last minute
-        pass
-    
-    def reverse(self): # Not implemented -> Last minute
-        pass
-    
-    def halt(self): # Not implemented -> Last minute
-        pass
         
     def test_obstacle_detection(self, i, text, image): #Testing function
         """This function is only created to test the obstacle detection algorithm not to be deployed"""
@@ -131,7 +120,6 @@ class Droid():
     
     def directional_capabilities(self, derivative: int, degree=60) -> None: # Almost Done
         """Not now, but i need to adjust the fps if the derivative is too high"""
-        """I also need to figure out speed too"""
         """This basically makes the droid go around a curvy track"""
         
         distance = self.estimate_object_distance()
@@ -156,6 +144,7 @@ class Droid():
         
         # IMPLEMENT BELOW
         
+        
         # self.purple_centroid[0]
         degree = self.map_boundboxdim2_framedim() 
         
@@ -177,9 +166,9 @@ class Droid():
             self.turn_left(degree)
             self.move_foward(seconds)
     
-    def distance_to_turn(self, frame_width: int, cx: int, arrow=None) -> int:
-        """This function calculates the difference between the track and the center of the camera."""
-        """Thus returns the difference for how much distance there is to turn for the steering function"""
+    def distance_to_turn(self, frame_width, cx, arrow=None) -> int:
+        """This function calculates the difference between the track and the center of the camera.
+        Thus returns the difference for how much distance there is to turn for the steering function"""
         frame_center = frame_width // 2
         derivative = frame_center - cx
         return derivative
@@ -284,7 +273,7 @@ class Droid():
         return None, None
     
     def detect_track(self) -> tuple[int, int]:
-        while True:
+        while True: 
             self.open_camera()
             ret, self.frame = self.camera.read()
             frame = self.frame
