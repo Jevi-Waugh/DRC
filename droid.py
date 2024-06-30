@@ -6,7 +6,7 @@ import typing
 import time
 
 class Droid():
-    def __init__(self, camera_index=0, FPS=20, ROH=40, ROW=40, frame=None):
+    def __init__(self, camera_index=1, FPS=20, ROH=40, ROW=40, frame=None):
         self.FPS = FPS  # Frames per second
         self.frame = frame
         # low FPS for straight line and a higher one for curvy lines and corners
@@ -70,12 +70,14 @@ class Droid():
     # ^^^^^^^
     # |||||||
     
-    def distance_to_turn(self, frame_width, cx, arrow=None) -> int:
+    def distance_to_turn(self, frame_width, cX, arrow=None) -> int:
         """This function calculates the difference between the track and the center of the camera.
         Thus returns the difference for how much distance there is to turn for the steering function"""
+        # perhaps get value from recalibration function that may invoke another function providing
+        # the estimated distance its meant to have away from the line.
         frame_center = frame_width // 2
-        derivative = frame_center - cx
-        return derivative
+        print(frame_center, cX)
+        return frame_center - cX if cX!= None else frame_center
         
     def test_obstacle_detection(self, i, text, image): #Testing function
         """This function is only created to test the obstacle detection algorithm not to be deployed"""
@@ -258,7 +260,10 @@ class Droid():
                 for i in range(len(centers)):
                     cv.circle(CURRENT_ROI, centers[i], 5, (255, 0, 0), -1)
                 cv.circle(CURRENT_ROI, (self.center_x, self.center_y), 5, (255, 0, 0), -1)
-            deviation = self.distance_to_turn(self.frame.shape[1], cx=self.center_x)
+            # print((self.frame.shape[1]), self.center_x)
+            # for debugging, if there is no tape for testing just have a dummy value for cx
+            # print(self.frame.shape[0])
+            # deviation = self.distance_to_turn(self.frame.shape[1], cx=self.center_x)
 
             cv.imshow('1. FUTURE_ROI1', FUTURE_ROI1)
             cv.imshow('2. FUTURE_ROI', FUTURE_ROI)
