@@ -10,14 +10,26 @@ def VisionAPI(send_q=None, recieve_q=None):
     
     # setting up the vision control for the droid
     # this might be done in main if process can handle enough byte for the Droid object
-    droid = Droid(camera_index = 0)
-    droid.rbg_2_hsv()
-    cx, cy = droid.detect_track()
-    # droid.center_x = 320
-    deviation = droid.distance_to_turn(droid.frame.shape[1], cX=droid.center_x)
-    obstacle = detect_purple_obstacle(droid)
-    print(f"deviaton={deviation}, obstacle={obstacle}")
+    droid = Droid(camera_index = 0, droid_status=True)
+    droid.deploy_rgb_2_hsv()
+    # below is to repeat
+    # Detect green line first.
+    while droid.green_contours:
+        # if green line is detected, then GO!
+            cx, cy = droid.detect_track()
+            # droid.center_x = 320
+            deviation = droid.distance_to_turn(droid.frame.shape[1], cX=droid.center_x)
+            obstacle = detect_purple_obstacle(droid)
+            print(f"deviaton={deviation}, obstacle={obstacle}")
+            print(droid.__repr__())
+            droid.green_contours = None 
+            # By the time this statement is reacged the droid would have probably gone off the 
+            # green start line unable to pick it uop again restting its value therefore this is feasable
+    
+    # Need to put data
     # detect arrow here
+    
+    # also detect other droid.
     
     # setting up queue
     # maybe typecast multiple data into a string for easy send off messages
@@ -31,4 +43,5 @@ def close_unlink_queue(queue):
     queue.unlink()
     
 
+# Currently running this file for testing andf debugging
 VisionAPI()
