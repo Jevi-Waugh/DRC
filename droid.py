@@ -6,12 +6,12 @@ import typing
 import time
 
 class Droid():
-    def __init__(self, camera_index=1, FPS=20, ROH=40, ROW=40, frame=None):
+    def __init__(self, camera_index=1, FPS=20, ROH=40, ROW=40, droid_status:bool = False, frame=None):
         self.FPS = FPS  # Frames per second
         self.frame = frame
         # low FPS for straight line and a higher one for curvy lines and corners
         self.camera = cv.VideoCapture(camera_index)
-        self.droid_status:bool = True
+        self.droid_status = droid_status
         self.obstacle:bool = False
         self.deviation = 0
         self.center_x, self.center_y = 0, 0
@@ -28,8 +28,18 @@ class Droid():
         self.blue_lower, self.blue_upper = None, None
         self.yellow_lower, self.yellow_upper = None, None
         self.purple_lower, self.purple_upper = None, None
-        self.PURPLE_MASK = None
+        self.green_lower, self.green_upper = None, None
+        self.red_lower, self.red_upper = None, None
+        
+        self.PURPLE_MASK, self.GREEN_MASK, self.RED_MASK = None, None, None
+        self.green_line: list[int, int] = [0,0] #start and end positions
+        self.green_contours = None
         # self.line : list = ArrowCnn.detect_trail()
+    def __repr__(self) -> str:
+        return f"Droid(droid_status={self.droid_status}, Centroid(cX={self.center_x}, cY={self.center_y}), Focal Length={self.focal_length}"
+    
+    def __str__(self) -> str:
+        return f"Not important atm"
         
     def arrow_detection(self):  # Not implemented -> Urgent
         """detect arrow -> either use contour detection or harris corner detection and get 7 corners"""
@@ -76,7 +86,7 @@ class Droid():
         # perhaps get value from recalibration function that may invoke another function providing
         # the estimated distance its meant to have away from the line.
         frame_center = frame_width // 2
-        print(frame_center, cX)
+        print(f"frame center={frame_center}, cX={cX}")
         return frame_center - cX if cX!= None else frame_center
         
     def test_obstacle_detection(self, i, text, image): #Testing function
@@ -89,19 +99,24 @@ class Droid():
         """A mathematical expression to determine how far is the object in the front -> distance of obstacle"""
         return int((self.REAL_OBSTACLE_HEIGHT * self.focal_length) / self.obstacle_area[1])
     
-    def rbg_2_hsv(self) -> np.ndarray:# Work on yellow tape and test purple obstacle and green lines
+    def rbg_2_hsv(self) -> np.ndarray: #Improved function defined below
         
         # [125, 50, 50]) is what i should get for the purple lower one
         # These are RGB Colours from RapidTables
-        
         # Formatting
         blue_lower_rbg =np.array([21,40,50], dtype=np.uint8)
         blue_upper_rbg = np.array([170,0,255], dtype=np.uint8)
+        
+        green_lower_rbg =np.array([89,255, 255], dtype=np.uint8)
+        green_upper_rbg = np.array([0,255, 0], dtype=np.uint8)
         
         yellow_lower_rbg = np.array([100, 87, 61], dtype=np.uint8)
         yellow_upper_rbg = np.array([255, 255, 0], dtype=np.uint8)
         
         purple_lower_rbg = np.array([230,230,250], dtype=np.uint8)
+        
+        red_lower_rbg = np.array([[[255, 0, 0]]], dtype=np.uint8)
+        red_upper_rbg = np.array([[[255, 51, 51]]], dtype=np.uint8)
         
         # converting it to an image with the channels
         blue_lower_rgb_img = np.array([[blue_lower_rbg]], dtype=np.uint8)
@@ -111,6 +126,10 @@ class Droid():
         yellow_upper_rgb_img = np.array([[yellow_upper_rbg]], dtype=np.uint8)
         
         purple_lower_rgb_img = np.array([[purple_lower_rbg]], dtype=np.uint8)
+        
+        green_lower_rgb_img = np.array([[green_lower_rbg]], dtype=np.uint8)
+        green_upper_rgb_img = np.array([[green_upper_rbg]], dtype=np.uint8)
+        
         
         # converting to hsv and extracting the single pixel
         self.blue_lower = cv.cvtColor(blue_lower_rgb_img, cv.COLOR_RGB2HSV)[0][0]
@@ -124,7 +143,36 @@ class Droid():
         # experimenting adjustment for the range of yellow
         # self.yellow_lower = np.array([light_yellow_hsv_img[0] - 10, 100, 100])
         # self.yellow_upper = np.array([light_yellow_hsv_img[0] + 10, 255, 255])
+        
+        self.green_upper = cv.cvtColor(green_upper_rgb_img, cv.COLOR_RGB2HSV)[0][0]
+        self.green_lower = cv.cvtColor(green_lower_rgb_img, cv.COLOR_RGB2HSV)[0][0]
+        
+        self.red_lower= cv.cvtColor(red_upper_rbg, cv.COLOR_RGB2HSV)[0][0]
+        self.red_upper = cv.cvtColor(red_lower_rbg, cv.COLOR_RGB2HSV)[0][0]
        
+    def rgb_2_hsv_improved(self, r, g, b) -> None: #DONE
+        rbg = np.uint8([[[r,g,b]]])
+        hsv = cv.cvtColor(rbg, cv.COLOR_RGB2HSV)[0][0]
+        return tuple(int(cl) for cl in hsv)
+    
+    def deploy_rgb_2_hsv(self) -> None: # Fine-Tuning needed
+    # Work on yellow tape and test purple obstacle and green lines
+        self.red_lower = self.rgb_2_hsv_improved(255,0,0)
+        self.red_upper = self.rgb_2_hsv_improved(255,51,51)
+        
+        self.blue_lower = self.rgb_2_hsv_improved(21,40,50)
+        self.blue_upper = self.rgb_2_hsv_improved(170,0,255)
+        
+        self.yellow_lower = self.rgb_2_hsv_improved(100, 87, 61)
+        self.yellow_upper = self.rgb_2_hsv_improved(255, 255, 0)
+        
+        self.green_lower = self.rgb_2_hsv_improved(35,100,100)
+        self.green_upper = self.rgb_2_hsv_improved(85,255,255)
+        
+        self.purple_lower = self.rgb_2_hsv_improved(230,230,250)
+        self.purple_upper = self.rgb_2_hsv_improved(170,0,255)
+        
+    
     def open_camera(self) -> bool:
         # Create a VideoCapture object to capture frames from the webcam
         if not self.camera.isOpened():
@@ -136,7 +184,7 @@ class Droid():
         self.camera.release()
         cv.destroyAllWindows()
     
-    def colour_detection(self, frame) -> list:
+    def colour_detection(self, frame) -> list: 
         """This function blurs each frame to reduce noise and also converts it to HSV to create masks"""
         # Included Purple masks
         # convert t`1`o Hue/Sat/Val
@@ -147,10 +195,18 @@ class Droid():
         BLUE_MASK = cv.inRange(hsv, self.blue_lower, self.blue_upper)
         YELLOW_MASK = cv.inRange(hsv, self.yellow_lower, self.yellow_upper)
         self.PURPLE_MASK = cv.inRange(hsv, self.purple_lower, self.purple_upper)
-        # Combine masks to see the track
+        self.GREEN_MASK = cv.inRange(hsv, self.green_lower, self.green_upper)
+        self.RED_MASK = cv.inRange(hsv, self.red_lower, self.red_upper)
         
+        # Combine masks to see the track
+        # Combining Blue and Yellow first for boundaries/track
         COMBINED_MASKS = cv.bitwise_or(BLUE_MASK, YELLOW_MASK)
+        # Adding Purple for object detection
         COMBINED_MASKS = cv.bitwise_or(COMBINED_MASKS, self.PURPLE_MASK)
+        # Adding Green for start and end line
+        COMBINED_MASKS = cv.bitwise_or(COMBINED_MASKS, self.GREEN_MASK)
+        # Adding Red to detect other Droids
+        COMBINED_MASKS = cv.bitwise_or(COMBINED_MASKS, self.RED_MASK)
         
         return [COMBINED_MASKS, BLUE_MASK, YELLOW_MASK]
 
@@ -206,11 +262,15 @@ class Droid():
         combined_mask, blue_mask, yellow_mask = self.colour_detection(roi)
         blue_edges = self.canny_edge(blue_mask)
         yellow_edges = self.canny_edge(yellow_mask)
+        red_edges = self.canny_edge(self.RED_MASK)
+        green_edges = self.canny_edge(self.GREEN_MASK)
         
         # Get Contours
         blue_contours = self.find_contours(blue_edges)
         yellow_contours = self.find_contours(yellow_edges)
-        
+        red_contours = self.find_contours(red_edges)
+        self.green_contours = self.find_contours(green_edges)
+    
         # Calculate the center of the track and return a tuple of (x,y)
         return self.calculate_center_line(blue_contours, yellow_contours)
 
@@ -277,3 +337,5 @@ class Droid():
             
             return self.center_x, self.center_y
     
+    def detect_green_line(self):
+        pass
