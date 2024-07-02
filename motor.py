@@ -1,7 +1,7 @@
 from droid import Droid
 
 class motor(Droid):
-    def __init__(self, speed, camera_index=0, FPS=20, ROH=40, ROW=40, frame=None):
+    def __init__(self, speed, camera_index=0, FPS=20, ROH=40, ROW=40, droid_status: bool=False, frame=None):
         super.__init__(self, camera_index, FPS, ROH, ROW, frame)
         self.speed = speed
         
