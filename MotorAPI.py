@@ -8,7 +8,14 @@ def MotorAPI(send_q, recieve_q):
     # or the obstacle boolean result.
     # assume this is correct for now.
     motor_dummy = motor()
-    motor_dummy.directional_capabilities(deviation)
+    if motor_dummy.green_line[0]== 1:
+        # this prolly has to be in a
+        motor_dummy.directional_capabilities(deviation)
+        motor_dummy.green_line == False
+        
+    else:
+        # put
+        Exception("Crtitcal Error, cannot find start line")
     
     messages = []
     
