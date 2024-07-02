@@ -11,7 +11,6 @@ def MotorAPI(send_q, recieve_q):
     if motor_dummy.green_line[0]== 1:
         # this prolly has to be in a
         motor_dummy.directional_capabilities(deviation)
-        motor_dummy.green_line == False
         
     else:
         # put
