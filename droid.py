@@ -337,5 +337,5 @@ class Droid():
             
             return self.center_x, self.center_y
     
-    def detect_green_line(self):
+    def detect_green_line(self) -> bool:
         pass
