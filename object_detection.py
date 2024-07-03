@@ -9,6 +9,7 @@ def detect_purple_obstacle(droid: Droid, mask=None, contours=None) -> bool:
     if mask is None:
         mask = droid.PURPLE_MASK
     purple_edges = droid.canny_edge(mask)
+    # What if contour edges cannot be picked up
     if contours is None:
         contours = droid.find_contours(purple_edges)
         if contours:
