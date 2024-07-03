@@ -14,15 +14,20 @@ def VisionAPI(send_q=None, recieve_q=None):
     droid.deploy_rgb_2_hsv()
     # below is to repeat
     # Detect green line first.
-    while droid.green_contours:
-        # if green line is detected, then GO!
-            cx, cy = droid.detect_track()
-            # droid.center_x = 320
-            deviation = droid.distance_to_turn(droid.frame.shape[1], cX=droid.center_x)
-            obstacle = detect_purple_obstacle(droid)
-            print(f"deviaton={deviation}, obstacle={obstacle}")
-            print(droid.__repr__())
-            droid.green_contours = None 
+   
+    # if green line is detected, then GO!
+    cx, cy = droid.detect_track()
+    droid.green_line = True if not droid.green_contours else False
+    # droid.center_x = 320
+    deviation = droid.distance_to_turn(droid.frame.shape[1], cX=droid.center_x)
+    obstacle = detect_purple_obstacle(droid)
+    print(f"deviaton={deviation}, obstacle={obstacle}")
+    print(droid.__repr__())
+            
+            
+            # Finish line
+             
+            
             # By the time this statement is reacged the droid would have probably gone off the 
             # green start line unable to pick it uop again restting its value therefore this is feasable
     
