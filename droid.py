@@ -73,6 +73,7 @@ class Droid():
         pass
     
     def detect_red_droid(self, mask):
+        
         # if mask matches red contour:
             # if obstacle:
                 # MAYBE SEND AN ARGUMENT TO DC OR AO TO SAY THAT THERE IS A DROID OR SOMETHING
