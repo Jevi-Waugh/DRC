@@ -1,7 +1,7 @@
 import cv2 as cv
-from ipcqueue import posixmq
+# from ipcqueue import posixmq
 from motor import motor
-def MotorAPI(send_q, recieve_q):
+def MotorAPI(send_q=None, recieve_q=None):
     deviation = recieve_q.get()
     # find a way to get the deviation
     # because getting this data could give either the arrow result

@@ -50,7 +50,7 @@ class motor(Droid):
             self.turn_left(degree)
             self.move_foward(seconds)
     
-    def directional_capabilities(self, droid: Droid, derivative: int, degree=60) -> None: # Almost Done
+    def directional_capabilities(self, droid: Droid, derivative: int, degree=60, red_droid=False) -> None: # Almost Done
         """Not now, but i need to adjust the fps if the derivative is too high"""
         """This basically makes the droid go around a curvy track"""
         
