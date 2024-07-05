@@ -52,29 +52,34 @@ class Droid():
         # determine a threshold to determine which arrow image is good to start counting distance
         # for e.g we don't want to count just lines
         
-        pass
-    
-    def turn_degree(self):  # Not implemented -> Urgent
-        """Find the degree of turning"""
-        pass
-    
-    def ultrasonic_waves(self) -> int:  # Not implemented -> Urgent
-        # get distance from c code
-        # purple
-        pass
+        def turn_degree(self):  # Not implemented -> Urgent
+            """Find the degree of turning"""
+            pass
     
     def recalibration_function(self, yellow: bool, blue: bool):  # Not implemented -> Urgent
         """the strict identification and perception of both Blue and Yellow tape"""
         """Assume only one tape was detected"""
         """need a strong value for colour detection this time"""
         pass
-    
+
     def perspective_transformation(self): # Not implemented -> Urgent
         """This should map the original coordinates to new ones so that it mimics human perception for better input of data"""
         pass
     
-    def map_boundboxdim2_framedim(self): # Not implemented -> Urgent
+    def map_boundboxdim2_framedim(self) -> float: # Not implemented -> Urgent
+        """This function maps the boundign box of the object to the frame
+        and returns the distance between a line and the object"""
         # update new value for purple centroid
+        pass
+    
+    def detect_red_droid(self, mask):
+        
+        # if mask matches red contour:
+            # if obstacle:
+                # MAYBE SEND AN ARGUMENT TO DC OR AO TO SAY THAT THERE IS A DROID OR SOMETHING
+                
+        #       then calculate distance:
+        #           and adjust distance
         pass
     
     # ^^^^^^^
@@ -172,7 +177,6 @@ class Droid():
         self.purple_lower = self.rgb_2_hsv_improved(230,230,250)
         self.purple_upper = self.rgb_2_hsv_improved(170,0,255)
         
-    
     def open_camera(self) -> bool:
         # Create a VideoCapture object to capture frames from the webcam
         if not self.camera.isOpened():
