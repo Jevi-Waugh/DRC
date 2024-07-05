@@ -9,11 +9,6 @@ from MotorAPI import MotorAPI
 from VisionAPI import close_unlink_queue
 from VisionAPI import VisionAPI
 
-<<<<<<< HEAD
-# CRUCIAL COMMENT!!!
-=======
-# Jevi here hello
->>>>>>> 668d2db496d15566e64a493f2c0aaf7146e3b1be
 
 def main(): # PIPELINE
     
