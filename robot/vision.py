@@ -1,4 +1,5 @@
 from droid import *
+from object_detection import detect_purple_obstacle
 from sys import stdout, stderr
 from posix_ipc import *
 from time import sleep
@@ -28,14 +29,14 @@ def main():
     droid = Droid(camera_index = 0, droid_status=True)
     droid.deploy_rgb_2_hsv()
     while True:
-        #x, y = get_centroid()
         x, y = droid.detect_track()
+        deviation = droid.distance_to_turn(droid.frame.shape[1], cX=droid.center_x)
+        obstacle = detect_purple_obstacle(droid)
 
         if (x == None or y == None):
             continue
         
         message = write_message(x, y)
-
         writeQueue.send(message)
 
         print(STDOUT_PREFIX + f"Sent ({x:>3}, {y:>3})")
@@ -58,12 +59,8 @@ def open_queue_write(qName):
             sleep(0.2)
 
 
-def get_centroid():
-    return random.randint(X_MIN, X_MAX), random.randint(Y_MIN, Y_MAX)
-
-
 def write_message(x, y):
-    return struct.pack("iii", SIGNITURE, x, y)
+    return struct.pack("iii", SIGNITURE, x, y, obstacle, arrow)
 
 if (__name__ == "__main__"):
     main()
