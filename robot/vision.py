@@ -24,10 +24,7 @@ def main():
     
     while True:
         centroid = droid.detect_track()  
-        
-        
-        
-        message = write_message(centroid)
+        message = write_message(centroid, droid.obstacle, droid.arrow, droid.start_line, droid.end_line, droid.deviation)
         writeQueue.send(message)
         print(STDOUT_PREFIX + f"Sent ({centroid[0]:>3}, {centroid[1]:>3})")
         stdout.flush()
@@ -49,11 +46,11 @@ def open_queue_write(qName):
             sleep(0.2)
 
 
-def write_message(c):
+def write_message(c, obs, arrow, start_line, end_line, deviation):
     iscent = False if c == (None, None) else True
     x = -1 if None else c[0]
     y = -1 if None else c[1]
-    return struct.pack("iiii", SIGNITURE, iscent, x, y)
+    return struct.pack("iiiiiiiii", SIGNITURE, iscent, x, y, obs, arrow, start_line, end_line, deviation)
 
 if (__name__ == "__main__"):
     main()
