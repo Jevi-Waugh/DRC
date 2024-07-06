@@ -29,14 +29,19 @@ def main():
     droid = Droid(camera_index = 0, droid_status=True)
     droid.deploy_rgb_2_hsv()
     while True:
-        #centroid = droid.detect_track()
-        centroid = get_centroid()
-        if (centroid == None):
+        centroid = droid.detect_track()
+        #centroid = get_centroid()
+        receivedNone = (
+            centroid == None or 
+            centroid[0] == None or 
+            centroid[1] == None)
+        if (receivedNone):
             continue
 
         x, y = centroid
 
-        
+        print(x) 
+        print(y) 
         message = write_message(x, y)
 
         writeQueue.send(message)
