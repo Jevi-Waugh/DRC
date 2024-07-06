@@ -2,7 +2,7 @@ import cv2 as cv
 import numpy as np
 from droid import Droid
 import time
-def detect_purple_obstacle(droid: Droid, mask=None, contours=None) -> bool:
+def detect_purple_obstacle(droid: Droid, mask=None, contours=None) -> int:
     # passing the droid object by reference.
     colour = (0, 100, 255)
     max_c = 0
@@ -37,7 +37,7 @@ def detect_purple_obstacle(droid: Droid, mask=None, contours=None) -> bool:
             if len(approx) == 4 and droid.area_threshold < max_c:
                 droid.obstacle = True  
                 droid.test_obstacle_detection(i, result, o_image)
-                return True
+                return 1
             
             elif len(approx) == 4:
                 # Recursive function as a safety contingency just incase.
@@ -50,8 +50,8 @@ def detect_purple_obstacle(droid: Droid, mask=None, contours=None) -> bool:
                 contours = cv.convexHull(approximation_func)
                 # recurse through
                 detect_purple_obstacle(contours=contours)
-            else: return False
-    else: return False
+            else: return 0
+    else: return 0
     
             
             
