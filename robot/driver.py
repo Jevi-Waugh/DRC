@@ -36,48 +36,42 @@ def main():
     state = {
         "setTurningAngle": 90,
         "setSpeed":     0,
-        "realTurningAngle": 90,
-        "realSpeed":    0
+        "curTurningAngle": 90,
+        "curSpeed":    0
     }
+    oldState = dict()
+
+    print_state_if_new(oldState, state)
+
     while True:
         read_message(state, readQueue, None)
+        print_state_if_new(oldState, state)
 
-        print(
-            STDOUT_PREFIX + f"State ("
-            f"{state['setTurningAngle']:>3.2f}, "
-            f"{state['setSpeed']:>3.2f}, "
-            f"{state['realTurningAngle']:>3.2f}, "
-            f"{state['realSpeed']:>3.2f})")
-        stdout.flush()
-
-        realUneqaulToSet = (
-                state["realSpeed"] != state["setSpeed"] or
-                state["realTurnAngle"] != state["setTurnAngle"])
-        while(realUneqaulToSet):
-            set_angle(state["turningAngle"]);
+        curUneqaulToSet = (
+                state["curSpeed"] != state["setSpeed"] or
+                state["curTurningAngle"] != state["setTurningAngle"])
+        while(curUneqaulToSet):
+            set_angle(state["setTurningAngle"]);
             set_speed(state["setSpeed"]);
 
-            nextSpeed = next_speed(
-                state['realSpeed'], 
+            state['curSpeed'] = next_speed(
+                state['curSpeed'], 
                 state['setSpeed'])
 
-            nextAngle = next_angle(
-                state['realTurningAngle'],
+            state['curTurningAngle'] = next_angle(
+                state['curTurningAngle'],
                 state['setTurningAngle'])
 
-            print(
-                STDOUT_PREFIX + f"State ("
-                f"{state['turningAngle']:>3.2f}, "
-                f"{state['setSpeed']:>3.2f}, "
-                f"{state['realSpeed']:>3.2f})")
-            stdout.flush()
+            print_state_if_new(oldState, state)
 
-            realUnequalToSet = (
-                    state["realSpeed"] != state["setSpeed"] or
-                    state["realTurnAngle"] != state["setTurnAngle"])
+            curUneqaulToSet = (
+                    state["curSpeed"] != state["setSpeed"] or
+                    state["curTurningAngle"] != state["setTurningAngle"])
 
             sleep(MS_PER_CHANGE / 1000)
+
             read_message(state, readQueue, 0)
+            print_state_if_new(oldState, state)
 
 
 def open_read_queue(qName):
@@ -90,6 +84,20 @@ def open_read_queue(qName):
         read = True,
         write = False)
 
+def print_state_if_new(oldState, state):
+    if (oldState != state):
+        print(
+            STDOUT_PREFIX + f"State ("
+            f"{state['setTurningAngle']:>3.2f}, "
+            f"{state['setSpeed']:>3.2f}, "
+            f"{state['curTurningAngle']:>3.2f}, "
+            f"{state['curSpeed']:>3.2f})")
+        stdout.flush()
+
+    oldState['setTurningAngle'] = state['setTurningAngle']
+    oldState['setSpeed'] = state['setSpeed']
+    oldState['curTurningAngle'] = state['curTurningAngle']
+    oldState['curSpeed'] = state['curSpeed']
 
 def get_sender_str(sender):
     senderToStr = [
@@ -113,22 +121,40 @@ def read_message(state, readQueue, timeout):
 
     formatString = "iff"
     unpackWidth = struct.calcsize(formatString)
-    sender, realSpeed, turningAngle, = struct.unpack(formatString, message[:unpackWidth])
+    while True:
+        sender, speed, turningAngle, = struct.unpack(formatString, message[:unpackWidth])
 
-    print(STDOUT_PREFIX + f"Received message from {get_sender_str(sender)}")
-    stdout.flush()
+        print(STDOUT_PREFIX + f"Received message from {get_sender_str(sender)}")
+        stdout.flush()
 
-    state["setSpeed"] = realSpeed
-    state["turningAngle"] = turningAngle
+        state["setSpeed"] = speed
+        state["setTurningAngle"] = turningAngle
+
+        try:
+            message, _ = readQueue.receive(0)
+        except BusyError:
+            return
+
+def expon_decay(base, x):
+    if x == 0:
+        return 0
+
+    sign = x/abs(x)
+    diff = sign * base ** abs(x) - 1
+    return diff
 
 
 def next_speed(setVal, curVal):
-    error = setVal - curVal
-    curVal + SPEED_PID.compute(error)
+    BASE = 1.045
+
+    error = curVal - setVal
+    return curVal - expon_decay(BASE, error)
 
 def next_angle(setVal, curVal):
-    error = setVal - curVal
-    curVal + TANGL_PID.compute(error)
+    BASE = 1.029
+
+    error = curVal - setVal
+    return curVal - expon_decay(BASE, error)
 
 def set_angle(angle):
     return
