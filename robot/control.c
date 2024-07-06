@@ -67,6 +67,7 @@ int main(int argc, char **argv) {
     atexit(unlink_read_queue);
     attach_unlink_sig_handler();
 
+    // Open queues
     mqd_t readQueue = open_read_queue(QUEUE_READ_NAME);
     printf(STDOUT_PREFIX "Opened queue \"%s\"\n", QUEUE_READ_NAME);
     fflush(stdout);
@@ -75,12 +76,15 @@ int main(int argc, char **argv) {
     printf(STDOUT_PREFIX "Opened queue \"%s\"\n", QUEUE_WRITE_NAME);
     fflush(stdout);
 
+    // Create memory for 
     char message[QUEUE_WRITE_SIZE];
     memset(message, 0, QUEUE_WRITE_SIZE);
 
     struct State state;
     memset(&state, 0, sizeof(state));
     while (1) {
+        // Read all data from queue and update state. Blocks until queue
+        // is non-empty
         update_sense_data(&state, readQueue);
 
         printf(
@@ -91,9 +95,11 @@ int main(int argc, char **argv) {
             state.distInFront);
         fflush(stdout);
 
+        // Calculate motor speed and turning angle
         float speed = calc_speed(&state);
         float turnAngle = calc_turn_angle(&state);
 
+        // Write message to drive process and send message
         write_message(message, speed, turnAngle);
         mq_send(writeQueue, message, sizeof(message), 0);
 
@@ -104,6 +110,7 @@ int main(int argc, char **argv) {
             speed);
         fflush(stdout);
 
+        // Simulated delay
         struct timespec delay;
         delay.tv_sec = 5;
         delay.tv_nsec = 0;
