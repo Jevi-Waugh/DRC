@@ -1,10 +1,11 @@
-from droid import *
 from sys import stdout, stderr
 from posix_ipc import *
 from time import sleep
 import struct
 import random
 import sys
+
+from droid import *
 
 STDOUT_PREFIX = "visn: "
 STDOUT_PREFIX = "visn: "
@@ -14,10 +15,10 @@ QUEUE_WRITE_SIZE = 64
 SIGNITURE = 1
 
 X_MIN = 0
-X_MAX = 400
+X_MAX = 639
 
 Y_MIN = 0
-Y_MAX = 200
+Y_MAX = 439
 
 
 def main():
@@ -28,11 +29,13 @@ def main():
     droid = Droid(camera_index = 0, droid_status=True)
     droid.deploy_rgb_2_hsv()
     while True:
-        #x, y = get_centroid()
-        x, y = droid.detect_track()
-
-        if (x == None or y == None):
+        #centroid = droid.detect_track()
+        centroid = get_centroid()
+        if (centroid == None):
             continue
+
+        x, y = centroid
+
         
         message = write_message(x, y)
 
