@@ -26,7 +26,7 @@ int main(int argc, char **argv) {
             "chrt",
             "--fifo",
             "80",
-            ".venv/drc2024/bin/python",
+            ".venv/DRC/bin/python",
             "driver.py",
             (char*) NULL);
         perror("vision execl failed");
@@ -40,7 +40,7 @@ int main(int argc, char **argv) {
             "chrt",
             "--fifo",
             "80",
-            ".venv/drc2024/bin/python",
+            ".venv/DRC/bin/python",
             "vision.py",
             (char*) NULL);
         perror("vision execl failed");
