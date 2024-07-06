@@ -12,7 +12,7 @@ class Droid():
         # low FPS for straight line and a higher one for curvy lines and corners
         self.camera = cv.VideoCapture(camera_index)
         self.droid_status = droid_status
-        self.obstacle:bool = False
+        self.obstacle:int = 0
         self.deviation = 0
         self.center_x, self.center_y = 0, 0
         self.cannyt1, self.cannyt2 = 50, 150
@@ -34,7 +34,10 @@ class Droid():
         self.PURPLE_MASK, self.GREEN_MASK, self.RED_MASK = None, None, None
         self.green_line: list[int, int] = [0,0] #start and end positions
         self.green_contours = None
-        # self.line : list = ArrowCnn.detect_trail()
+        self.start_line, self.end_line = 0,0
+        
+        self.arrow: int  = 0
+        self.arrow_dim = None
     def __repr__(self) -> str:
         return f"Droid(droid_status={self.droid_status}, Centroid(cX={self.center_x}, cY={self.center_y}), Focal Length={self.focal_length}"
     
@@ -319,7 +322,8 @@ class Droid():
                     centers.append((center_x, center_y))
             # print(centers)
             self.center_x, self.center_y = self.calculate_wac(centers, weights[:len(centers)])
-            
+            self.start_line = 1 if self.green_contours else 0
+            self.end_line = 1 if self.green_contours != None and self.start_line == 1 else 0
             if self.center_x is not None and self.center_y is not None:
                 for i in range(len(centers)):
                     cv.circle(CURRENT_ROI, centers[i], 5, (255, 0, 0), -1)
