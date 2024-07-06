@@ -13,6 +13,7 @@ def detect_7_corners(self):
 
 
 def arrow_detect(self):
+    pass
     # process frame and use a bianry mask such as black and white
     
     # get the contour of that mask
