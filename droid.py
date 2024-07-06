@@ -295,7 +295,7 @@ class Droid():
             frame = self.frame
             if not ret:
                 print("CAN'T EXTRACT FRAME! CRITICAL ISSUE!!")
-                break
+                return None, None
             
             combined, blue, yellow = self.colour_detection(frame)
             

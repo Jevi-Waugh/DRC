@@ -23,13 +23,13 @@ def main():
     droid.deploy_rgb_2_hsv()
     
     while True:
-        cx, cy = droid.detect_track()
-        if (cx == None and cy == None):
-            continue
-        print(f"CX: {cx}, CY: {cy}")
-        message = write_message(cx, cy)
+        centroid = droid.detect_track()  
+        
+        
+        
+        message = write_message(centroid)
         writeQueue.send(message)
-        print(STDOUT_PREFIX + f"Sent ({x:>3}, {y:>3})")
+        print(STDOUT_PREFIX + f"Sent ({centroid[0]:>3}, {centroid[1]:>3})")
         stdout.flush()
 
         sleep(1)
@@ -49,8 +49,11 @@ def open_queue_write(qName):
             sleep(0.2)
 
 
-def write_message(x, y):
-    return struct.pack("iii", SIGNITURE, x, y)
+def write_message(c):
+    iscent = False if c == (None, None) else True
+    x = -1 if None else c[0]
+    y = -1 if None else c[1]
+    return struct.pack("iiii", SIGNITURE, iscent, x, y)
 
 if (__name__ == "__main__"):
     main()
