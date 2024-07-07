@@ -1,6 +1,10 @@
 import cv2 as cv
 def harris_corner_detection(self, binary_mask) -> int:
     frame = cv.cornerHarris()
+    # det(M)=λ1λ2
+    # trace(M)=λ1+λ2
+    # λ1 and λ2 are the eigenvalues of M\
+    # R=det(M)−k(trace(M))2
     # return length of corners
 
 
