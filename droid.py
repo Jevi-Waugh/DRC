@@ -4,8 +4,9 @@ import cv2 as cv
 import numpy as np
 import typing
 import time
+import random
 
-class Droid():
+class Vision():
     def __init__(self, camera_index=1, FPS=20, ROH=40, ROW=40, droid_status:bool = False, frame=None):
         self.FPS = FPS  # Frames per second
         self.frame = frame
@@ -40,21 +41,6 @@ class Droid():
     
     def __str__(self) -> str:
         return f"Not important atm"
-        
-    def arrow_detection(self):  # Not implemented -> Urgent
-        """detect arrow -> either use contour detection or harris corner detection and get 7 corners"""
-        
-        # get frame and send to pytorch
-        
-        # get current image/ from pytorch model
-        # evaliuate whethere it's right or a left turn
-        
-        # determine a threshold to determine which arrow image is good to start counting distance
-        # for e.g we don't want to count just lines
-        
-        def turn_degree(self):  # Not implemented -> Urgent
-            """Find the degree of turning"""
-            pass
     
     def recalibration_function(self, yellow: bool, blue: bool):  # Not implemented -> Urgent
         """the strict identification and perception of both Blue and Yellow tape"""
@@ -87,12 +73,13 @@ class Droid():
     
     def distance_to_turn(self, frame_width, cX, arrow=None) -> int:
         """This function calculates the difference between the track and the center of the camera.
-        Thus returns the difference for how much distance there is to turn for the steering function"""
+        Thus returns the difference in angular rotational movement for how much distance there is to turn for the steering function"""
         # perhaps get value from recalibration function that may invoke another function providing
         # the estimated distance its meant to have away from the line.
         frame_center = frame_width // 2
+        RANGE = 270
         print(f"frame center={frame_center}, cX={cX}")
-        return frame_center - cX if cX!= None else frame_center
+        return (frame_center - cX)*RANGE if cX!= None else frame_center
         
     def test_obstacle_detection(self, i, text, image): #Testing function
         """This function is only created to test the obstacle detection algorithm not to be deployed"""
@@ -103,59 +90,10 @@ class Droid():
     def estimate_object_distance(self) -> int: # Done
         """A mathematical expression to determine how far is the object in the front -> distance of obstacle"""
         return int((self.REAL_OBSTACLE_HEIGHT * self.focal_length) / self.obstacle_area[1])
-    
-    def rbg_2_hsv(self) -> np.ndarray: #Improved function defined below
-        
-        # [125, 50, 50]) is what i should get for the purple lower one
-        # These are RGB Colours from RapidTables
-        # Formatting
-        blue_lower_rbg =np.array([21,40,50], dtype=np.uint8)
-        blue_upper_rbg = np.array([170,0,255], dtype=np.uint8)
-        
-        green_lower_rbg =np.array([89,255, 255], dtype=np.uint8)
-        green_upper_rbg = np.array([0,255, 0], dtype=np.uint8)
-        
-        yellow_lower_rbg = np.array([100, 87, 61], dtype=np.uint8)
-        yellow_upper_rbg = np.array([255, 255, 0], dtype=np.uint8)
-        
-        purple_lower_rbg = np.array([230,230,250], dtype=np.uint8)
-        
-        red_lower_rbg = np.array([[[255, 0, 0]]], dtype=np.uint8)
-        red_upper_rbg = np.array([[[255, 51, 51]]], dtype=np.uint8)
-        
-        # converting it to an image with the channels
-        blue_lower_rgb_img = np.array([[blue_lower_rbg]], dtype=np.uint8)
-        blue_upper_rgb_img = np.array([[blue_upper_rbg]], dtype=np.uint8)
-        
-        yellow_lower_rgb_img = np.array([[yellow_lower_rbg]], dtype=np.uint8)
-        yellow_upper_rgb_img = np.array([[yellow_upper_rbg]], dtype=np.uint8)
-        
-        purple_lower_rgb_img = np.array([[purple_lower_rbg]], dtype=np.uint8)
-        
-        green_lower_rgb_img = np.array([[green_lower_rbg]], dtype=np.uint8)
-        green_upper_rgb_img = np.array([[green_upper_rbg]], dtype=np.uint8)
-        
-        
-        # converting to hsv and extracting the single pixel
-        self.blue_lower = cv.cvtColor(blue_lower_rgb_img, cv.COLOR_RGB2HSV)[0][0]
-        self.blue_upper = cv.cvtColor(blue_upper_rgb_img, cv.COLOR_RGB2HSV)[0][0]
-        
-        self.yellow_lower = cv.cvtColor(yellow_lower_rgb_img, cv.COLOR_RGB2HSV)[0][0]
-        self.yellow_upper = cv.cvtColor(yellow_upper_rgb_img, cv.COLOR_RGB2HSV)[0][0]
-        
-        self.purple_upper = cv.cvtColor(blue_upper_rgb_img, cv.COLOR_RGB2HSV)[0][0]
-        self.purple_lower = cv.cvtColor(purple_lower_rgb_img, cv.COLOR_RGB2HSV)[0][0]
-        # experimenting adjustment for the range of yellow
-        # self.yellow_lower = np.array([light_yellow_hsv_img[0] - 10, 100, 100])
-        # self.yellow_upper = np.array([light_yellow_hsv_img[0] + 10, 255, 255])
-        
-        self.green_upper = cv.cvtColor(green_upper_rgb_img, cv.COLOR_RGB2HSV)[0][0]
-        self.green_lower = cv.cvtColor(green_lower_rgb_img, cv.COLOR_RGB2HSV)[0][0]
-        
-        self.red_lower= cv.cvtColor(red_upper_rbg, cv.COLOR_RGB2HSV)[0][0]
-        self.red_upper = cv.cvtColor(red_lower_rbg, cv.COLOR_RGB2HSV)[0][0]
-       
+
     def rgb_2_hsv_improved(self, r, g, b) -> None: #DONE
+        # converting it to an image with the channels
+        # converting to hsv and extracting the single pixel
         rbg = np.uint8([[[r,g,b]]])
         hsv = cv.cvtColor(rbg, cv.COLOR_RGB2HSV)[0][0]
         return tuple(int(cl) for cl in hsv)
@@ -268,7 +206,7 @@ class Droid():
         yellow_edges = self.canny_edge(yellow_mask)
         red_edges = self.canny_edge(self.RED_MASK)
         green_edges = self.canny_edge(self.GREEN_MASK)
-        
+        2
         # Get Contours
         blue_contours = self.find_contours(blue_edges)
         yellow_contours = self.find_contours(yellow_edges)
