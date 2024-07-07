@@ -1,23 +1,29 @@
 import cv2 as cv
-def harris_corner_detection(self, binary_mask) -> int:
-    frame = cv.cornerHarris()
+from droid import Vision
+def harris_corner_detection(self, binary_mask) -> list:
     pass
-    # return length of corners
+    # det(M)=λ1λ2
+    # trace(M)=λ1+λ2
+    # λ1 and λ2 are the eigenvalues of M\
+    # R=det(M)−k(trace(M))2
+    # return corners
 
 
-def detect_7_corners(self):
-    # get the Contour
-    # use harris corner detection on the contour mask or photo
-    # but find a way to accurately expect the arrow
-    pass
-
-
-def arrow_detect(self):
-    pass
+def arrow_detect(self, vision_sys: Vision, frame):
     # process frame and use a bianry mask such as black and white
+    gray_frame = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
+    processed_frame = cv.GaussianBlur(gray_frame, (5, 5), 0)
+ 
+    
     
     # get the contour of that mask
-    
+    # BUG
+    # Issue is that i might feed it white oine to detect the arrow
+    # but the contour itself will be the sheet and not the arrow.
+    # i guess once i find 4 corners of the white sheet then get the frame inside that and get the contour again 
+    # then expect 7 corners.
+    contour = vision_sys.find_contours(processed_frame)
+    corners = harris_corner_detection(contour)
     
     # use harris corner detection on the contour mask
     
