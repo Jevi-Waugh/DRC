@@ -35,7 +35,8 @@ class Vision():
         self.PURPLE_MASK, self.GREEN_MASK, self.RED_MASK = None, None, None
         self.green_line: list[int, int] = [0,0] #start and end positions
         self.green_contours = None
-        # self.line : list = ArrowCnn.detect_trail()
+        self.arrow = False
+        self.arrow_dir = None
     def __repr__(self) -> str:
         return f"Droid(droid_status={self.droid_status}, Centroid(cX={self.center_x}, cY={self.center_y}), Focal Length={self.focal_length}"
     
