@@ -51,5 +51,5 @@ This project implements a system that creates a spatial environment detecting cr
 
 ## Authors
 
-[Jevi Waugh](https://github.com/Jevi-Waugh) - Vision System
-[Jack Mills](https://github.com/jamis0) - Robotic control and Multi-processing
+* [Jevi Waugh](https://github.com/Jevi-Waugh) - Vision System
+* [Jack Mills](https://github.com/jamis0) - Robotic control and Multi-processing
