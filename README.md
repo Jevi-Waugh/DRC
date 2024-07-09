@@ -2,7 +2,7 @@
 This project implements an autonomous droid designed to navigate through a track strictly using Computer Vision (Cam & Ultrasonic sensor). The system detects the environment and captures essential infomation that allows it to make critical and informed decisions. The droid will start and stop only when it sees a green and end line.
 
 ## Table of Contents
-*Introduction
+* Introduction
 *Features
 *Requirements
 *Installation
