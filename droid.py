@@ -53,10 +53,14 @@ class Vision():
         """This should map the original coordinates to new ones so that it mimics human perception for better input of data"""
         pass
     
-    def map_boundboxdim2_framedim(self) -> float: # Not implemented -> Urgent
+    def map_boundboxdim2_framedim(self, bounding_react) -> float: # Not implemented -> Urgent
         """This function maps the boundign box of the object to the frame
         and returns the distance between a line and the object"""
         # update new value for purple centroid
+        (x_axis_tl, y_axis_tl, width, height) = bounding_react
+        for pixel in self.frame:
+            if pixel == x_axis_tl or pixel == y_axis_tl:
+                # top left x corner matches
         pass
     
     def detect_red_droid(self, mask):
